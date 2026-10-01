@@ -56,13 +56,13 @@ minio:
       memory: "4Gi"
 
 # ------------------------------------------------------------------------------
-# 2. APACHE FLINK 1.9.3 (Java 1.8 + S3 MinIO Checkpoints)
+# 2. APACHE FLINK 2.0 (Java 21 LTS + S3 MinIO Checkpoints)
 # ------------------------------------------------------------------------------
 flink:
   enabled: true
   image:
     repository: "flink" # Official Docker Hub image
-    tag: "1.9.3-scala_2.12"
+    tag: "2.0.0-java21" # Upgraded to Java 21 LTS runtime (or flink:java21)
   jobManager:
     replicas: 1
     rpcPort: 6123
@@ -104,13 +104,13 @@ flink:
     adminPassword: "flinkAdminPassword123"
 
 # ------------------------------------------------------------------------------
-# 3. APACHE KAFKA (KRaft mode, 3-member cluster, Java 1.8 + SASL Authentication)
+# 3. APACHE KAFKA 3.9 (KRaft mode, 3-member cluster, Java 21 LTS + SASL Authentication)
 # ------------------------------------------------------------------------------
 kafka:
   enabled: true
   image:
     repository: "apache/kafka" # Official Apache Kafka Docker Hub image
-    tag: "3.7.2"
+    tag: "3.9.0" # Official Apache Kafka 3.9 (Java 21 LTS Recommended)
   replicas: 3 # 3 members for Raft controller & broker quorum
   clusterId: "4L622nShTZaIO_BL5JDU7Q" # 16-byte base64 cluster ID
   kraft:
@@ -239,13 +239,13 @@ redis:
     schedule: "0 4 * * *"
 
 # ------------------------------------------------------------------------------
-# 7. APACHE ZOOKEEPER 3.6.3 (Java 1.8 Quorum Cluster + SASL Authentication)
+# 7. APACHE ZOOKEEPER 3.9.3 (Java 21 LTS Quorum Cluster + SASL Authentication)
 # ------------------------------------------------------------------------------
 zookeeper:
-  enabled: true # Active 3-member ZooKeeper 3.6.3 cluster
+  enabled: true # Active 3-member ZooKeeper 3.9.3 cluster
   image:
-    repository: "zookeeper" # Official Docker Hub image (Java 8)
-    tag: "3.6.3"
+    repository: "zookeeper" # Official Docker Hub image (Java 21 compatible)
+    tag: "3.9.3"
   replicas: 3 # 3 members quorum (1 Leader + 2 Followers)
   auth:
     enabled: true

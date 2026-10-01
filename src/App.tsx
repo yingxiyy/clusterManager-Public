@@ -619,19 +619,19 @@ FLINK_ADMIN_PASSWORD=${flinkAdminPassword}
    Auth Password: ${redisPassword}
    MasterAuth:    ${redisPassword}
 
-5. Apache Kafka 3.7 KRaft (Port 9092 SASL_PLAINTEXT)
+5. Apache Kafka 3.9 KRaft (Java 21 LTS, Port 9092 SASL_PLAINTEXT)
    Admin User:    ${kafkaAdminUser}
    Admin Password:${kafkaAdminPassword}
    Client User:   ${kafkaAppUser}
    Client Password:${kafkaAppPassword}
    Security:      SASL_PLAINTEXT (PlainLoginModule)
 
-6. Apache ZooKeeper 3.6.3 (Port 2181)
+6. Apache ZooKeeper 3.9.3 (Java 21 LTS, Port 2181)
    Admin User:    ${zkAdminUser}
    Admin Password:${zkAdminPassword}
    Security:      SASL Digest Auth
 
-7. Apache Flink 1.9.3 (Port 8081 Dashboard & REST API)
+7. Apache Flink 2.0 (Java 21 LTS, Port 8081 Dashboard & REST API)
    Admin User:    ${flinkAdminUser}
    Admin Password:${flinkAdminPassword}
    Dashboard URL: http://${vipIp}:8081
@@ -937,7 +937,7 @@ echo "Verify on Master: kubectl get nodes"
     triggerConfirmation({
       title: isDownscale ? 'Confirm Downscaling ZooKeeper Quorum' : 'Confirm Scaling ZooKeeper Ensemble',
       actionType: 'scale_zk',
-      targetName: `Apache ZooKeeper 3.6.3: ${zkReplicas} → ${newCount} Members`,
+      targetName: `Apache ZooKeeper 3.9.3 (Java 21): ${zkReplicas} → ${newCount} Members`,
       details: `ZooKeeper quorum ensemble will update configuration with ${newCount} servers (requires floor(N/2)+1 votes).`,
       warningText: isDownscale && (newCount < 3)
         ? 'DANGER: ZooKeeper ensemble should always maintain an odd number of servers (3, 5, 7) for split-brain prevention!'
@@ -1020,7 +1020,7 @@ flink:
   enabled: true
   image:
     repository: "flink"
-    tag: "1.9.3-scala_2.12"
+    tag: "2.0.0-java21"
   jobManager:
     replicas: 1
   taskManager:
@@ -1034,7 +1034,7 @@ kafka:
   enabled: true
   image:
     repository: "apache/kafka"
-    tag: "3.7.2"
+    tag: "3.9.0"
   replicas: ${kafkaReplicas}
   kraft:
     enabled: ${useKraft}
@@ -1099,7 +1099,7 @@ zookeeper:
   enabled: ${enableZookeeper}
   image:
     repository: "zookeeper"
-    tag: "3.6.3"
+    tag: "3.9.3"
   replicas: ${zkReplicas} # 3-member quorum
   auth:
     enabled: true
@@ -1131,7 +1131,7 @@ zookeeper:
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                3-Master HA K8s • ZooKeeper 3.6.3 • Kafka KRaft • Flink 1.9.3 • MongoDB 8.0.9 • MySQL 8.4.6 • Redis 6.2.6 • MinIO S3
+                3-Master HA K8s • ZooKeeper 3.9.3 • Kafka 3.9 (Java 21) • Flink 2.0 (Java 21) • MongoDB 8.0.9 • MySQL 8.4.6 • Redis 6.2.6 • MinIO S3
               </p>
             </div>
           </div>
@@ -2154,8 +2154,8 @@ zookeeper:
                       <Server className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-white text-sm">Apache ZooKeeper 3.6.3</h3>
-                      <p className="text-[10px] text-slate-400">Port 2181 • 3-Node Quorum • SASL / Digest 鉴权</p>
+                      <h3 className="font-bold text-white text-sm">Apache ZooKeeper 3.9.3</h3>
+                      <p className="text-[10px] text-slate-400">Port 2181 • Java 21 LTS • 3-Node Quorum • SASL / Digest 鉴权</p>
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800">
@@ -2203,8 +2203,8 @@ zookeeper:
                       <Activity className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-white text-sm">Apache Flink 1.9.3 控制台</h3>
-                      <p className="text-[10px] text-slate-400">Port 8081 • Web Dashboard & REST API BasicAuth</p>
+                      <h3 className="font-bold text-white text-sm">Apache Flink 2.0 控制台</h3>
+                      <p className="text-[10px] text-slate-400">Port 8081 • Java 21 LTS • Web Dashboard & REST API BasicAuth</p>
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950 text-amber-300 border border-amber-800">
@@ -2674,7 +2674,7 @@ db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})`
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                      Apache Flink 1.9.3 JobManager & TaskManager Scaler
+                      Apache Flink 2.0 (Java 21 LTS) JobManager & TaskManager Scaler
                       <span className="px-2 py-0.5 rounded text-xs font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                         {executionMode === 'backend' ? '⚡ Backend Direct Mode Active' : '📋 Manual CLI Mode Active'}
                       </span>
@@ -2727,8 +2727,8 @@ db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})`
                 </div>
                 <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
                   <div className="text-[11px] text-slate-400">Java Runtime</div>
-                  <div className="text-sm font-bold font-mono text-purple-300 mt-1">OpenJDK 8 (Java 1.8)</div>
-                  <div className="text-[10px] text-slate-500">Native compatibility</div>
+                  <div className="text-sm font-bold font-mono text-purple-300 mt-1">Eclipse Temurin 21 (Java 21 LTS)</div>
+                  <div className="text-[10px] text-slate-500">Modern LTS & ZGC Compatible</div>
                 </div>
               </div>
 
@@ -2926,11 +2926,11 @@ db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})`
                   </div>
                 </div>
 
-                {/* ZooKeeper 3.6.3 Ensemble Scaler */}
+                {/* ZooKeeper 3.9.3 Ensemble Scaler */}
                 <div className="bg-slate-950 p-4 rounded-xl border border-cyan-500/30 space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-sm text-cyan-300 flex items-center gap-2">
-                      <Server className="w-4 h-4" /> ZooKeeper 3.6.3
+                      <Server className="w-4 h-4" /> ZooKeeper 3.9.3
                     </span>
                     <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono text-xs border border-cyan-800">
                       {zkReplicas} Nodes
@@ -2951,7 +2951,7 @@ db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})`
                     </button>
                   </div>
                   <div className="text-[11px] text-slate-400">
-                    ZK Quorum: <span className="text-slate-200">{Math.floor(zkReplicas / 2) + 1} of {zkReplicas} votes (Java 8)</span>
+                    ZK Quorum: <span className="text-slate-200">{Math.floor(zkReplicas / 2) + 1} of {zkReplicas} votes (Java 21 LTS)</span>
                   </div>
                 </div>
 
@@ -3087,20 +3087,20 @@ db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})`
                 </div>
 
                 <div className="bg-slate-950 p-4 rounded-xl border border-amber-500/30">
-                  <div className="text-amber-400 font-bold text-sm">Flink 1.9.3 (Java 8)</div>
+                  <div className="text-amber-400 font-bold text-sm">Flink 2.0 (Java 21)</div>
                   <div className="text-slate-300 mt-1">1 JM + {flinkTaskManagers} TaskManagers</div>
                   <div className="text-slate-500 text-[10px] mt-1">{flinkTaskManagers * 4} Total Slots (s3-fs-hadoop)</div>
                 </div>
 
                 <div className="bg-slate-950 p-4 rounded-xl border border-purple-500/30">
-                  <div className="text-purple-400 font-bold text-sm">Kafka KRaft</div>
+                  <div className="text-purple-400 font-bold text-sm">Kafka 3.9 KRaft</div>
                   <div className="text-slate-300 mt-1">{kafkaReplicas} Members (Combined Roles)</div>
-                  <div className="text-slate-500 text-[10px] mt-1">Java 8 Compatible • No ZK Req</div>
+                  <div className="text-slate-500 text-[10px] mt-1">Java 21 LTS • High-Throughput Raft</div>
                 </div>
 
                 <div className="bg-slate-950 p-4 rounded-xl border border-cyan-500/30">
-                  <div className="text-cyan-300 font-bold text-sm">ZooKeeper 3.6.3</div>
-                  <div className="text-slate-300 mt-1">{zkReplicas} Nodes Ensemble (Java 8)</div>
+                  <div className="text-cyan-300 font-bold text-sm">ZooKeeper 3.9.3</div>
+                  <div className="text-slate-300 mt-1">{zkReplicas} Nodes Ensemble (Java 21 LTS)</div>
                   <div className="text-slate-500 text-[10px] mt-1">Quorum Ensemble (:2181/:2888/:3888)</div>
                 </div>
 
