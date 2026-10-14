@@ -65,7 +65,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: local-path-provisioner
-          image: rancher/local-path-provisioner:v0.0.28
+          image: docker.m.daocloud.io/rancher/local-path-provisioner:v0.0.28
           imagePullPolicy: IfNotPresent
           command:
             - local-path-provisioner
@@ -151,5 +151,5 @@ data:
           effect: NoSchedule
       containers:
       - name: helper-pod
-        image: busybox:latest
+        image: docker.m.daocloud.io/library/busybox:latest
         imagePullPolicy: IfNotPresent
