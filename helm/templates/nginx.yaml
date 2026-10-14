@@ -1,0 +1,253 @@
+{{- if .Values.nginx.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  labels:
+    app: nginx
+    {{- include "cloudcluster.labels" . | nindent 4 }}
+data:
+  nginx.conf: |
+    # ==============================================================================
+    # Nginx Production Configuration - Enterprise Frontend Entry & API Gateway
+    # ==============================================================================
+    user  {{ .Values.nginx.user | default "dci" }};
+    worker_processes  auto;
+    worker_rlimit_nofile 65535;
+
+    events {
+        worker_connections 8192;
+        use epoll;
+        multi_accept on;
+    }
+
+    http {
+        include       mime.types;
+        default_type  application/octet-stream;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for" '
+                          'rt=$request_time uct="$upstream_connect_time" uht="$upstream_header_time" urt="$upstream_response_time"';
+
+        sendfile        on;
+        tcp_nopush     on;
+        tcp_nodelay    on;
+        server_tokens  off;
+
+        keepalive_timeout  65;
+        keepalive_requests 10000;
+
+        # Gzip High-Performance Compression
+        gzip  on;
+        gzip_vary on;
+        gzip_proxied any;
+        gzip_min_length  1024;
+        gzip_buffers    16 8k;
+        gzip_comp_level 6;
+        gzip_http_version 1.1;
+        gzip_types      text/plain text/css application/json application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml application/wasm font/x-woff font/ttf font/opentype;
+
+        # WebSocket Connection Upgrade Mapping
+        map $http_upgrade $connection_upgrade {
+            default upgrade;
+            ''      close;
+        }
+
+        # Upstream Gateway Proxy Pool with HTTP Keepalive (Optimized dci.org)
+        upstream dci.org {
+            server {{ .Values.nginx.upstream.server | default "gateway:8080" }};
+            keepalive 32;
+        }
+
+        # --------------------------------------------------------------------------
+        # Main Virtual Host (Port 8088): Frontend Web App & Business API Proxy
+        # --------------------------------------------------------------------------
+        server {
+            listen       {{ .Values.nginx.ports.http | default 8088 }};
+            server_name  localhost;
+            charset      utf-8;
+            index        index.html index.htm;
+
+            access_log   /home/dci/web/log/nginx_access.log main;
+            error_log    /home/dci/web/log/nginx_error.log error;
+
+            error_page   500 502 503 504  /50x.html;
+            location = /50x.html {
+                root   /usr/share/nginx/html;
+            }
+
+            # Liveness & Readiness Probe
+            location = /healthz {
+                access_log off;
+                return 200 "healthy\n";
+            }
+
+            # 1. API Reverse Proxy with Full WebSocket & Streaming Support
+            location ~ ^/(restconf|resource|deviceLog|historyPm|idc|create|alarm|telemetry|pm-ws|create-notification|pmreport|oauth2|users|roles|permission|taskinfo|maintenance-tool|advance|cli|system|apsswitchlog) {
+                proxy_pass http://dci.org;
+                proxy_http_version 1.1;
+
+                # Full-duplex WebSocket Protocol Upgrade
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+
+                # Client Real IP & Routing Headers
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header REMOTE-HOST $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_redirect off;
+
+                # Buffer & Timeout Tuning for High Throughput & Large Payloads
+                client_max_body_size 50m;
+                client_body_buffer_size 256k;
+                proxy_connect_timeout 600s;
+                proxy_send_timeout 600s;
+                proxy_read_timeout 600s;
+                proxy_buffer_size 256k;
+                proxy_buffers 4 256k;
+                proxy_busy_buffers_size 256k;
+                proxy_temp_file_write_size 256k;
+                proxy_max_temp_file_size 128m;
+                proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+            }
+
+            # 2. Static Assets Caching (Fast Cache for images/fonts/css/js)
+            location ~* \.(?:ico|css|js|gif|jpe?g|png|PNG|woff2?|eot|ttf|svg|otf|webp|map|conf)$ {
+                root /home/dci/web/dist;
+                expires 30d;
+                add_header Cache-Control "public, no-transform, max-age=2592000";
+            }
+
+            # 3. HTML No-Cache Policy (Ensures Immediate Updates upon CI/CD Frontend Release)
+            location = /index.html {
+                root /home/dci/web/dist;
+                add_header Cache-Control "no-cache, no-store, must-revalidate";
+                expires 0;
+            }
+
+            # 4. Frontend SPA Router Fallback (Prevents 404 on Browser Refresh)
+            location / {
+                root  /home/dci/web/dist;
+                try_files $uri $uri/ /index.html;
+            }
+        }
+
+        # --------------------------------------------------------------------------
+        # Management & Cache Purge Virtual Host (Port 8000)
+        # --------------------------------------------------------------------------
+        server {
+            listen       {{ .Values.nginx.ports.mgmt | default 8000 }};
+            server_name  10.242.111.29 localhost;
+            charset      utf-8;
+
+            location ~ /purge(/.*) {
+                allow all;
+                return 200 "Cache purge acknowledged\n";
+            }
+        }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-entry
+  labels:
+    app: nginx
+    {{- include "cloudcluster.labels" . | nindent 4 }}
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: {{ .Values.nginx.ports.http | default 8088 }}
+      targetPort: {{ .Values.nginx.ports.http | default 8088 }}
+      nodePort: {{ .Values.nginx.ports.nodePortHttp | default 30088 }}
+    - name: mgmt
+      port: {{ .Values.nginx.ports.mgmt | default 8000 }}
+      targetPort: {{ .Values.nginx.ports.mgmt | default 8000 }}
+      nodePort: {{ .Values.nginx.ports.nodePortMgmt | default 30080 }}
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-entry
+  labels:
+    app: nginx
+    {{- include "cloudcluster.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.nginx.replicas | default 3 }}
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      {{- with .Values.nginx.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginx.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nginx
+          image: {{ include "cloudcluster.image" (dict "image" .Values.nginx.image "global" .Values.global) | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Ensure user dci exists and directories are prepared
+              id -u dci >/dev/null 2>&1 || (adduser -D -u 1000 dci 2>/dev/null || useradd -u 1000 dci 2>/dev/null || true)
+              mkdir -p /home/dci/web/log /home/dci/web/dist
+              chown -R dci:dci /home/dci/web/log /home/dci/web/dist 2>/dev/null || true
+              exec nginx -g 'daemon off;'
+          ports:
+            - name: http
+              containerPort: {{ .Values.nginx.ports.http | default 8088 }}
+            - name: mgmt
+              containerPort: {{ .Values.nginx.ports.mgmt | default 8000 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.nginx.ports.http | default 8088 }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.nginx.ports.http | default 8088 }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            # 外部真实宿主机静态文件挂载点: 代码放外面，无需每次重构镜像！
+            - name: frontend-dist
+              mountPath: /home/dci/web/dist
+            - name: frontend-logs
+              mountPath: /home/dci/web/log
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+        # 物理宿主机目录映射: 静态资源随时拉取更新，Pod 零停机热读
+        - name: frontend-dist
+          hostPath:
+            path: {{ .Values.nginx.frontendDist.hostPath | quote }}
+            type: DirectoryOrCreate
+        - name: frontend-logs
+          hostPath:
+            path: {{ .Values.nginx.logPath.hostPath | quote }}
+            type: DirectoryOrCreate
+{{- end }}

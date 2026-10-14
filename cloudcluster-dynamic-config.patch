@@ -1,0 +1,1789 @@
+From 0abe8ff732ce7219cf9d3822c942b56283bdeee0 Mon Sep 17 00:00:00 2001
+From: yingxi yao <yingxi.yao@gmail.com>
+Date: Sat, 10 Oct 2026 18:55:34 +0000
+Subject: [PATCH] refactor(config): support cloudCluster dynamic scaling for
+ mysql, zookeeper, kafka, redis, mongodb
+
+---
+ .../src/test/resources/mongodb.properties        | 14 +++++++-------
+ .../src/test/resources/zkclient_conf.properties  |  2 +-
+ .../webapp/src/main/resources/application.yml    |  4 ++--
+ .../webapp/src/main/resources/mongodb.properties | 12 ++++++------
+ .../webapp/src/main/resources/mysql.properties   | 12 ++++++------
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ app-monitor/src/main/resources/application.yml   |  4 ++--
+ app-monitor/src/main/resources/mysql.properties  |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../src/main/resources/cache.properties          |  4 ++--
+ .../src/main/resources/mysql.properties          |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ cli-service/src/main/resources/cache.properties  |  4 ++--
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ db-monitor/src/main/resources/application.yml    |  4 ++--
+ db-monitor/src/main/resources/cache.properties   |  4 ++--
+ db-monitor/src/main/resources/mongodb.properties | 10 +++++-----
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../src/main/resources/application.yml           |  4 ++--
+ .../src/main/resources/mongodb.properties        |  8 ++++----
+ .../src/main/resources/mysql.properties          |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ devicelog/src/main/resources/application.yml     |  4 ++--
+ devicelog/src/main/resources/cache.properties    |  4 ++--
+ devicelog/src/main/resources/mongodb.properties  | 12 ++++++------
+ devicelog/src/main/resources/mysql.properties    | 12 ++++++------
+ .../src/main/resources/zkclient_conf.properties  |  4 ++--
+ .../src/main/resources/mongodb.properties        | 16 ++++++++--------
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../method2/src/main/resources/application.yml   |  4 ++--
+ .../src/main/resources/mongodb.properties        | 16 ++++++++--------
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../src/main/resources/cache.properties          |  4 ++--
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ idc-manager/src/main/resources/mysql.properties  |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../impl-app/src/main/resources/application.yml  |  4 ++--
+ .../src/main/resources/mongodb.properties        | 10 +++++-----
+ .../impl-app/src/main/resources/mysql.properties |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ neMgr/src/main/resources/application.yml         |  4 ++--
+ neMgr/src/main/resources/mongodb.properties      | 10 +++++-----
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../nms-rest/src/main/resources/cache.properties |  4 ++--
+ .../src/main/resources/mongodb.properties        | 10 +++++-----
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ notifier/src/main/resources/application.yml      |  4 ++--
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../otdr-rest/src/main/resources/application.yml |  4 ++--
+ .../src/main/resources/mongodb.properties        | 10 +++++-----
+ .../src/main/resources/mysql.properties          |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../src/main/resources/application.yml           |  4 ++--
+ .../src/main/resources/cache.properties          |  4 ++--
+ .../src/main/resources/mongodb.properties        | 12 ++++++------
+ .../src/main/resources/mysql.properties          |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ schedule/src/main/resources/application.yml      |  4 ++--
+ schedule/src/main/resources/mongodb.properties   | 10 +++++-----
+ schedule/src/main/resources/mysql.properties     |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ sftpserver/src/main/resources/application.yml    |  4 ++--
+ sftpserver/src/main/resources/mongodb.properties | 12 ++++++------
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ status/src/main/resources/application.yml        |  4 ++--
+ status/src/main/resources/cache.properties       |  4 ++--
+ status/src/main/resources/mongodb.properties     | 12 ++++++------
+ status/src/main/resources/mysql.properties       |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../src/main/resources/application.yml           |  4 ++--
+ .../src/main/resources/mongodb.properties        | 12 ++++++------
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../restful/src/main/resources/application.yml   |  4 ++--
+ .../restful/src/main/resources/cache.properties  |  4 ++--
+ .../src/main/resources/mongodb.properties        | 12 ++++++------
+ .../restful/src/main/resources/mysql.properties  |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ taskInfo/src/main/resources/application.yml      |  4 ++--
+ taskInfo/src/main/resources/mysql.properties     |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ .../src/test/resources/zkclient_conf.properties  |  2 +-
+ .../src/main/resources/mongodb.properties        | 10 +++++-----
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ tools/templates/mongodb.properties               | 14 +++++++-------
+ tools/templates/mysql.properties                 |  6 +++---
+ tools/templates/zkclient_conf.properties         |  2 +-
+ user-manager/src/main/resources/application.yml  |  4 ++--
+ user-manager/src/main/resources/cache.properties |  4 ++--
+ user-manager/src/main/resources/mysql.properties |  6 +++---
+ .../src/main/resources/zkclient_conf.properties  |  2 +-
+ 90 files changed, 247 insertions(+), 247 deletions(-)
+
+diff --git a/allocate/designer/src/test/resources/mongodb.properties b/allocate/designer/src/test/resources/mongodb.properties
+index c81e81e..d38a339 100644
+--- a/allocate/designer/src/test/resources/mongodb.properties
++++ b/allocate/designer/src/test/resources/mongodb.properties
+@@ -19,20 +19,20 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-#mongodb.servers=n3:27017
+-mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
+-#mongodb.servers=135.251.96.66:27017,135.251.96.69:27017,135.251.96.63:27017
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ 
+ #mongodb.port=27017
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ 
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/allocate/designer/src/test/resources/zkclient_conf.properties b/allocate/designer/src/test/resources/zkclient_conf.properties
+index 13a7a7c..97f11fb 100644
+--- a/allocate/designer/src/test/resources/zkclient_conf.properties
++++ b/allocate/designer/src/test/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=n3:2182
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=allocator
+ NAMESPACE=testGroup
+diff --git a/allocate/webapp/src/main/resources/application.yml b/allocate/webapp/src/main/resources/application.yml
+index 5a70e04..c84d9cd 100644
+--- a/allocate/webapp/src/main/resources/application.yml
++++ b/allocate/webapp/src/main/resources/application.yml
+@@ -25,7 +25,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: '1'
+ 
+ 
+@@ -35,5 +35,5 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: $KAFKA_BROKER
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: ${KAFKA_REPLICA}
+diff --git a/allocate/webapp/src/main/resources/mongodb.properties b/allocate/webapp/src/main/resources/mongodb.properties
+index 3618cdb..d399aab 100644
+--- a/allocate/webapp/src/main/resources/mongodb.properties
++++ b/allocate/webapp/src/main/resources/mongodb.properties
+@@ -9,16 +9,16 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:27011
+-#mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/allocate/webapp/src/main/resources/mysql.properties b/allocate/webapp/src/main/resources/mysql.properties
+index 6811229..e38e939 100644
+--- a/allocate/webapp/src/main/resources/mysql.properties
++++ b/allocate/webapp/src/main/resources/mysql.properties
+@@ -2,12 +2,12 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-#spring.datasource.url=jdbc:mysql://localhost:3306/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-#spring.datasource.username=sotn
+-#spring.datasource.password=123456
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13309/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++#spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++#spring.datasource.username=${MYSQL_USER:root}
++#spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/allocate/webapp/src/main/resources/zkclient_conf.properties b/allocate/webapp/src/main/resources/zkclient_conf.properties
+index 902aeac..1fe84fa 100644
+--- a/allocate/webapp/src/main/resources/zkclient_conf.properties
++++ b/allocate/webapp/src/main/resources/zkclient_conf.properties
+@@ -7,7 +7,7 @@
+ #  * and is available at http://www.eclipse.org/legal/epl-v10.html
+ #  */
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=allocator
+ NAMESPACE=zxy
+diff --git a/app-monitor/src/main/resources/application.yml b/app-monitor/src/main/resources/application.yml
+index 2f8177a..268f404 100644
+--- a/app-monitor/src/main/resources/application.yml
++++ b/app-monitor/src/main/resources/application.yml
+@@ -23,7 +23,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 10.242.111.39:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: app-monitor-test
+ 
+@@ -38,7 +38,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: status-monitor
+ logging.level.net.flex.dci.otn.controller.app.monitor: INFO
+\ No newline at end of file
+diff --git a/app-monitor/src/main/resources/mysql.properties b/app-monitor/src/main/resources/mysql.properties
+index fb1b2bd..4ad97bb 100644
+--- a/app-monitor/src/main/resources/mysql.properties
++++ b/app-monitor/src/main/resources/mysql.properties
+@@ -10,9 +10,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://10.242.111.24:3306/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=root
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/app-monitor/src/main/resources/zkclient_conf.properties b/app-monitor/src/main/resources/zkclient_conf.properties
+index 2c105ca..dff5c57 100644
+--- a/app-monitor/src/main/resources/zkclient_conf.properties
++++ b/app-monitor/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=135.251.103.206:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=appMonitor
+ NAMESPACE=yyx
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/auth-service/auth-rest/src/main/resources/cache.properties b/auth-service/auth-rest/src/main/resources/cache.properties
+index f73ff29..8187fb0 100644
+--- a/auth-service/auth-rest/src/main/resources/cache.properties
++++ b/auth-service/auth-rest/src/main/resources/cache.properties
+@@ -1,8 +1,8 @@
+ # cache properties for the configuration
+ redis.redisson.mode=single
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/auth-service/auth-rest/src/main/resources/mysql.properties b/auth-service/auth-rest/src/main/resources/mysql.properties
+index 7e8c51c..2597800 100644
+--- a/auth-service/auth-rest/src/main/resources/mysql.properties
++++ b/auth-service/auth-rest/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13308/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/auth-service/auth-rest/src/main/resources/zkclient_conf.properties b/auth-service/auth-rest/src/main/resources/zkclient_conf.properties
+index 1800f48..b9c4fd6 100644
+--- a/auth-service/auth-rest/src/main/resources/zkclient_conf.properties
++++ b/auth-service/auth-rest/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=auth-service
+ NAMESPACE=chengdu
+diff --git a/cli-service/src/main/resources/cache.properties b/cli-service/src/main/resources/cache.properties
+index 8ab7dae..ddeb2b9 100644
+--- a/cli-service/src/main/resources/cache.properties
++++ b/cli-service/src/main/resources/cache.properties
+@@ -3,8 +3,8 @@ redis.redisson.mode=single
+ # cache properties for the configuration
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/cli-service/src/main/resources/zkclient_conf.properties b/cli-service/src/main/resources/zkclient_conf.properties
+index 3a5c303..e0e269b 100644
+--- a/cli-service/src/main/resources/zkclient_conf.properties
++++ b/cli-service/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=cli-service
+ NAMESPACE=test
+diff --git a/db-monitor/src/main/resources/application.yml b/db-monitor/src/main/resources/application.yml
+index 0c2b8de..2a10898 100644
+--- a/db-monitor/src/main/resources/application.yml
++++ b/db-monitor/src/main/resources/application.yml
+@@ -29,7 +29,7 @@ db-monitor:
+   processor:
+     enabled: true
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: db-monitor
+ 
+@@ -56,7 +56,7 @@ db-monitor:
+     enabled: true
+ logging.level.net.flex.dci.otn.controller.db.monitor: INFO
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: db-monitor
+ 
+diff --git a/db-monitor/src/main/resources/cache.properties b/db-monitor/src/main/resources/cache.properties
+index 8ab7dae..ddeb2b9 100644
+--- a/db-monitor/src/main/resources/cache.properties
++++ b/db-monitor/src/main/resources/cache.properties
+@@ -3,8 +3,8 @@ redis.redisson.mode=single
+ # cache properties for the configuration
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/db-monitor/src/main/resources/mongodb.properties b/db-monitor/src/main/resources/mongodb.properties
+index a088002..afe6c79 100644
+--- a/db-monitor/src/main/resources/mongodb.properties
++++ b/db-monitor/src/main/resources/mongodb.properties
+@@ -18,15 +18,15 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:37011
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/db-monitor/src/main/resources/zkclient_conf.properties b/db-monitor/src/main/resources/zkclient_conf.properties
+index c2a4f9c..9dda2bb 100644
+--- a/db-monitor/src/main/resources/zkclient_conf.properties
++++ b/db-monitor/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=dbMonitor
+ NAMESPACE=zxy
+diff --git a/device-maintenance/src/main/resources/application.yml b/device-maintenance/src/main/resources/application.yml
+index 53ec43c..965e3bc 100644
+--- a/device-maintenance/src/main/resources/application.yml
++++ b/device-maintenance/src/main/resources/application.yml
+@@ -124,7 +124,7 @@ spring:
+       on-profile: default
+ 
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   consumer:
+     group-id: ops-tool
+     auto-offset-reset: latest
+@@ -188,6 +188,6 @@ spring:
+       on-profile: production
+ 
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+ server:
+   address: ${myIp}
+diff --git a/device-maintenance/src/main/resources/mongodb.properties b/device-maintenance/src/main/resources/mongodb.properties
+index 2ce23d4..06de86f 100644
+--- a/device-maintenance/src/main/resources/mongodb.properties
++++ b/device-maintenance/src/main/resources/mongodb.properties
+@@ -12,10 +12,10 @@ mongodb.enable=true
+ mongodb.restore.auto.enable=true
+ 
+ # MongoDB 连接信息（生产环境由 install.sh 自动替换）
+-mongodb.servers=127.0.0.1:27010,127.0.0.1:27011,127.0.0.1:27012
+-mongodb.database=sotn
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++mongodb.database=${MONGO_DATABASE:sotn}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ 
+ # MongoDB 认证机制（可选）
+ # 支持: SHA-1, SHA-256, MONGODB-CR, X-509, PLAIN, GSSAPI
+diff --git a/device-maintenance/src/main/resources/mysql.properties b/device-maintenance/src/main/resources/mysql.properties
+index 827d7f5..5afabcb 100644
+--- a/device-maintenance/src/main/resources/mysql.properties
++++ b/device-maintenance/src/main/resources/mysql.properties
+@@ -20,9 +20,9 @@ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ 
+ # 数据库连接信息（生产环境由 install.sh 自动替换）
+-spring.datasource.url=jdbc:mysql://127.0.0.1:3309/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ 
+ # Druid 连接池配置
+ spring.datasource.druid.initial-size=5
+diff --git a/device-maintenance/src/main/resources/zkclient_conf.properties b/device-maintenance/src/main/resources/zkclient_conf.properties
+index ecc4f62..edea14b 100644
+--- a/device-maintenance/src/main/resources/zkclient_conf.properties
++++ b/device-maintenance/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2190,127.0.0.1:2191,127.0.0.1:2192
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=device-maintenance
+ # NAMESPACE 只填写业务命名空间，不带 dciworld/ 前缀。
+diff --git a/devicelog/src/main/resources/application.yml b/devicelog/src/main/resources/application.yml
+index e7863e8..9437471 100644
+--- a/devicelog/src/main/resources/application.yml
++++ b/devicelog/src/main/resources/application.yml
+@@ -27,7 +27,7 @@ spring:
+ logging.level.root: INFO
+ 
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: apsswitch-test
+ ---
+@@ -37,6 +37,6 @@ spring:
+       on-profile: production
+ 
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: apsswitch-monitor
+diff --git a/devicelog/src/main/resources/cache.properties b/devicelog/src/main/resources/cache.properties
+index e72cd83..597a77c 100644
+--- a/devicelog/src/main/resources/cache.properties
++++ b/devicelog/src/main/resources/cache.properties
+@@ -2,8 +2,8 @@ redis.redisson.mode=single
+ # cache properties for the configuration
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/devicelog/src/main/resources/mongodb.properties b/devicelog/src/main/resources/mongodb.properties
+index 24bd0bd..d399aab 100644
+--- a/devicelog/src/main/resources/mongodb.properties
++++ b/devicelog/src/main/resources/mongodb.properties
+@@ -9,16 +9,16 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:37011
+-#mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/devicelog/src/main/resources/mysql.properties b/devicelog/src/main/resources/mysql.properties
+index adb3e0d..e38e939 100644
+--- a/devicelog/src/main/resources/mysql.properties
++++ b/devicelog/src/main/resources/mysql.properties
+@@ -2,12 +2,12 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-#spring.datasource.url=jdbc:mysql://localhost:3306/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-#spring.datasource.username=sotn
+-#spring.datasource.password=123456
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13308/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++#spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++#spring.datasource.username=${MYSQL_USER:root}
++#spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/devicelog/src/main/resources/zkclient_conf.properties b/devicelog/src/main/resources/zkclient_conf.properties
+index 14108aa..81e9ff6 100644
+--- a/devicelog/src/main/resources/zkclient_conf.properties
++++ b/devicelog/src/main/resources/zkclient_conf.properties
+@@ -5,8 +5,8 @@
+ # *  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ # *  and is available at http://www.eclipse.org/legal/epl-v10.html
+ # */
+-#ZOOKEEPER_SERVERS=127.0.0.1:2181
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++#ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=devicelog
+ NAMESPACE=default
+diff --git a/discovery/method1/src/main/resources/mongodb.properties b/discovery/method1/src/main/resources/mongodb.properties
+index 38e4f0d..128cd46 100644
+--- a/discovery/method1/src/main/resources/mongodb.properties
++++ b/discovery/method1/src/main/resources/mongodb.properties
+@@ -19,20 +19,20 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-#mongodb.servers=n3:27017
+-mongodb.servers=135.251.103.206:27017
+-#mongodb.servers=135.251.96.66:27017,135.251.96.69:27017,135.251.96.63:27017
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ 
+ #mongodb.port=27017
+ #mongodb.port=27017
+ # database name
+-#mongodb.database=sotn
+-mongodb.database=yyxsotn
++#mongodb.database=${MONGO_DATABASE:sotn}
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/discovery/method1/src/main/resources/zkclient_conf.properties b/discovery/method1/src/main/resources/zkclient_conf.properties
+index fd11cef..39dda40 100644
+--- a/discovery/method1/src/main/resources/zkclient_conf.properties
++++ b/discovery/method1/src/main/resources/zkclient_conf.properties
+@@ -6,7 +6,7 @@
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+ 
+-ZOOKEEPER_SERVERS=135.251.103.206:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=discovery1
+ NAMESPACE=yyx
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/discovery/method2/src/main/resources/application.yml b/discovery/method2/src/main/resources/application.yml
+index 6393090..ed3e567 100644
+--- a/discovery/method2/src/main/resources/application.yml
++++ b/discovery/method2/src/main/resources/application.yml
+@@ -19,7 +19,7 @@ logging:
+     org.mongodb: OFF
+     org.opendaylight: OFF
+ kafka:
+-  bootstrap-servers: 10.242.111.39:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+ ---
+ spring:
+@@ -27,7 +27,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+ logging:
+   level:
+diff --git a/discovery/method2/src/main/resources/mongodb.properties b/discovery/method2/src/main/resources/mongodb.properties
+index 3e33252..128cd46 100644
+--- a/discovery/method2/src/main/resources/mongodb.properties
++++ b/discovery/method2/src/main/resources/mongodb.properties
+@@ -19,20 +19,20 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-#mongodb.servers=n3:27017
+-mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
+-#mongodb.servers=135.251.96.66:27017,135.251.96.69:27017,135.251.96.63:27017
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ 
+ #mongodb.port=27017
+ #mongodb.port=27017
+ # database name
+-#mongodb.database=sotn
+-mongodb.database=sotn
++#mongodb.database=${MONGO_DATABASE:sotn}
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/discovery/method2/src/main/resources/zkclient_conf.properties b/discovery/method2/src/main/resources/zkclient_conf.properties
+index 327f6b2..d2741f8 100644
+--- a/discovery/method2/src/main/resources/zkclient_conf.properties
++++ b/discovery/method2/src/main/resources/zkclient_conf.properties
+@@ -6,7 +6,7 @@
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+ 
+-ZOOKEEPER_SERVERS=135.251.103.206:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=discovery2
+ NAMESPACE=yyx
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/gateway/gateway-webapp/src/main/resources/cache.properties b/gateway/gateway-webapp/src/main/resources/cache.properties
+index 9985321..8187fb0 100644
+--- a/gateway/gateway-webapp/src/main/resources/cache.properties
++++ b/gateway/gateway-webapp/src/main/resources/cache.properties
+@@ -1,8 +1,8 @@
+ # cache properties for the configuration
+ redis.redisson.mode=single
+ # redisson single properties
+-redis.redisson.address=redis://10.242.111.29:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/gateway/gateway-webapp/src/main/resources/zkclient_conf.properties b/gateway/gateway-webapp/src/main/resources/zkclient_conf.properties
+index d9134db..de14908 100644
+--- a/gateway/gateway-webapp/src/main/resources/zkclient_conf.properties
++++ b/gateway/gateway-webapp/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=135.251.103.206:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=gateway
+ NAMESPACE=chengdu
+diff --git a/idc-manager/src/main/resources/mysql.properties b/idc-manager/src/main/resources/mysql.properties
+index 91b03ff..3a9e6b8 100644
+--- a/idc-manager/src/main/resources/mysql.properties
++++ b/idc-manager/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQL55Dialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=update
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://10.242.111.24:3306/sotnTest?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=root
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/idc-manager/src/main/resources/zkclient_conf.properties b/idc-manager/src/main/resources/zkclient_conf.properties
+index fa4b1c2..0d66ee9 100644
+--- a/idc-manager/src/main/resources/zkclient_conf.properties
++++ b/idc-manager/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=idcManager
+ NAMESPACE=default
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/implement/impl-app/src/main/resources/application.yml b/implement/impl-app/src/main/resources/application.yml
+index 53575c5..25c80de 100644
+--- a/implement/impl-app/src/main/resources/application.yml
++++ b/implement/impl-app/src/main/resources/application.yml
+@@ -45,7 +45,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 10.242.111.39:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+ 
+ 
+ ---
+@@ -58,7 +58,7 @@ server:
+   address: ${myIp}
+ 
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+ 
+ 
+diff --git a/implement/impl-app/src/main/resources/mongodb.properties b/implement/impl-app/src/main/resources/mongodb.properties
+index 7b2d305..e382a93 100644
+--- a/implement/impl-app/src/main/resources/mongodb.properties
++++ b/implement/impl-app/src/main/resources/mongodb.properties
+@@ -18,15 +18,15 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:37011
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/implement/impl-app/src/main/resources/mysql.properties b/implement/impl-app/src/main/resources/mysql.properties
+index ad93004..73e0a7e 100644
+--- a/implement/impl-app/src/main/resources/mysql.properties
++++ b/implement/impl-app/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13308/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/implement/impl-app/src/main/resources/zkclient_conf.properties b/implement/impl-app/src/main/resources/zkclient_conf.properties
+index fc19c42..c5cf58e 100644
+--- a/implement/impl-app/src/main/resources/zkclient_conf.properties
++++ b/implement/impl-app/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=implementor
+ NAMESPACE=zxy
+diff --git a/neMgr/src/main/resources/application.yml b/neMgr/src/main/resources/application.yml
+index 584f420..095fbc9 100644
+--- a/neMgr/src/main/resources/application.yml
++++ b/neMgr/src/main/resources/application.yml
+@@ -27,7 +27,7 @@ spring:
+       on-profile: default
+ 
+ kafka:
+-  bootstrap-servers: 172.18.86.38:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   consumer-group: ne-manager-test
+ #logging.level.org.springframework.web: DEBUG
+ logging.level.org.springframework.boot: DEBUG
+@@ -41,7 +41,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+ server:
+   address: ${myIp}
+ logging.level.org.mongodb.driver: OFF
+diff --git a/neMgr/src/main/resources/mongodb.properties b/neMgr/src/main/resources/mongodb.properties
+index 1c76937..9ba3b9e 100644
+--- a/neMgr/src/main/resources/mongodb.properties
++++ b/neMgr/src/main/resources/mongodb.properties
+@@ -18,15 +18,15 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=127.0.0.1:27017
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/neMgr/src/main/resources/zkclient_conf.properties b/neMgr/src/main/resources/zkclient_conf.properties
+index 77c90e6..358ac8f 100644
+--- a/neMgr/src/main/resources/zkclient_conf.properties
++++ b/neMgr/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=neMgr
+ NAMESPACE=china_Telecom
+diff --git a/nms-service/nms-rest/src/main/resources/cache.properties b/nms-service/nms-rest/src/main/resources/cache.properties
+index 45e5c6b..cb4c0a1 100644
+--- a/nms-service/nms-rest/src/main/resources/cache.properties
++++ b/nms-service/nms-rest/src/main/resources/cache.properties
+@@ -2,8 +2,8 @@
+ redis.redisson.mode=single
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/nms-service/nms-rest/src/main/resources/mongodb.properties b/nms-service/nms-rest/src/main/resources/mongodb.properties
+index f939ac3..3248883 100644
+--- a/nms-service/nms-rest/src/main/resources/mongodb.properties
++++ b/nms-service/nms-rest/src/main/resources/mongodb.properties
+@@ -18,15 +18,15 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:37011
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/nms-service/nms-rest/src/main/resources/zkclient_conf.properties b/nms-service/nms-rest/src/main/resources/zkclient_conf.properties
+index bb7f709..e7e4afa 100644
+--- a/nms-service/nms-rest/src/main/resources/zkclient_conf.properties
++++ b/nms-service/nms-rest/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=nms-service
+ NAMESPACE=chengdu
+diff --git a/notifier/src/main/resources/application.yml b/notifier/src/main/resources/application.yml
+index 3ac372b..487e1f9 100644
+--- a/notifier/src/main/resources/application.yml
++++ b/notifier/src/main/resources/application.yml
+@@ -15,7 +15,7 @@ logging:
+     org.springframework.web: DEBUG
+     org.apache.kafka.clients: OFF
+ kafka:
+-  bootstrap-servers: 10.242.111.39:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: test-consumer
+ ---
+@@ -24,7 +24,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+ server:
+   address: ${myIp}
+ logging.level.net.flex.dci.otn.controller.alarm.notifier: INFO
+\ No newline at end of file
+diff --git a/notifier/src/main/resources/zkclient_conf.properties b/notifier/src/main/resources/zkclient_conf.properties
+index 1c88276..1b0bcaa 100644
+--- a/notifier/src/main/resources/zkclient_conf.properties
++++ b/notifier/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=notifier
+ NAMESPACE=zxy
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/otdr-manager/otdr-rest/src/main/resources/application.yml b/otdr-manager/otdr-rest/src/main/resources/application.yml
+index 81bf8bb..f623301 100644
+--- a/otdr-manager/otdr-rest/src/main/resources/application.yml
++++ b/otdr-manager/otdr-rest/src/main/resources/application.yml
+@@ -22,7 +22,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 10.242.111.39:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: otdr-monitor
+ 
+@@ -45,6 +45,6 @@ spring:
+ 
+ logging.level.net.flex.dci.otn.controller.db.monitor: INFO
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: otdr-monitor
+diff --git a/otdr-manager/otdr-rest/src/main/resources/mongodb.properties b/otdr-manager/otdr-rest/src/main/resources/mongodb.properties
+index a088002..afe6c79 100644
+--- a/otdr-manager/otdr-rest/src/main/resources/mongodb.properties
++++ b/otdr-manager/otdr-rest/src/main/resources/mongodb.properties
+@@ -18,15 +18,15 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:37011
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/otdr-manager/otdr-rest/src/main/resources/mysql.properties b/otdr-manager/otdr-rest/src/main/resources/mysql.properties
+index 59e0df6..2597800 100644
+--- a/otdr-manager/otdr-rest/src/main/resources/mysql.properties
++++ b/otdr-manager/otdr-rest/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13308/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/otdr-manager/otdr-rest/src/main/resources/zkclient_conf.properties b/otdr-manager/otdr-rest/src/main/resources/zkclient_conf.properties
+index e0cb4d3..f98d74f 100644
+--- a/otdr-manager/otdr-rest/src/main/resources/zkclient_conf.properties
++++ b/otdr-manager/otdr-rest/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=otdr-manager
+ NAMESPACE=chengdu
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/resource-statistic/src/main/resources/application.yml b/resource-statistic/src/main/resources/application.yml
+index c487079..d0b29db 100644
+--- a/resource-statistic/src/main/resources/application.yml
++++ b/resource-statistic/src/main/resources/application.yml
+@@ -43,7 +43,7 @@ logging.level.org.apache.kafka.clients: OFF
+ logging.level.net.flex.dci.otc.zkclient4boot: OFF
+ #logging.level.root: DEBUG
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: test-consumer
+ ---
+@@ -52,7 +52,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+ logging.level.net.flex.dci.otn.controller.db.monitor: INFO
+ 
+ 
+diff --git a/resource-statistic/src/main/resources/cache.properties b/resource-statistic/src/main/resources/cache.properties
+index 8ab7dae..ddeb2b9 100644
+--- a/resource-statistic/src/main/resources/cache.properties
++++ b/resource-statistic/src/main/resources/cache.properties
+@@ -3,8 +3,8 @@ redis.redisson.mode=single
+ # cache properties for the configuration
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/resource-statistic/src/main/resources/mongodb.properties b/resource-statistic/src/main/resources/mongodb.properties
+index f925623..d399aab 100644
+--- a/resource-statistic/src/main/resources/mongodb.properties
++++ b/resource-statistic/src/main/resources/mongodb.properties
+@@ -9,16 +9,16 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=127.0.0.1:27017
+-#mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/resource-statistic/src/main/resources/mysql.properties b/resource-statistic/src/main/resources/mysql.properties
+index 4c287e4..73e0a7e 100644
+--- a/resource-statistic/src/main/resources/mysql.properties
++++ b/resource-statistic/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-spring.datasource.username=root
+-spring.datasource.password=musa2333
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/resource-statistic/src/main/resources/zkclient_conf.properties b/resource-statistic/src/main/resources/zkclient_conf.properties
+index 8b81b58..0094afa 100644
+--- a/resource-statistic/src/main/resources/zkclient_conf.properties
++++ b/resource-statistic/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=resource-statistic
+ NAMESPACE=zxy
+diff --git a/schedule/src/main/resources/application.yml b/schedule/src/main/resources/application.yml
+index 901c86f..0606d40 100644
+--- a/schedule/src/main/resources/application.yml
++++ b/schedule/src/main/resources/application.yml
+@@ -59,7 +59,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: schedule
+ 
+@@ -71,7 +71,7 @@ spring:
+       on-profile: production
+ 
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+ 
+ logging.level.net.flex.dci.otn.controller: DEBUG
+\ No newline at end of file
+diff --git a/schedule/src/main/resources/mongodb.properties b/schedule/src/main/resources/mongodb.properties
+index b806d6f..afe6c79 100644
+--- a/schedule/src/main/resources/mongodb.properties
++++ b/schedule/src/main/resources/mongodb.properties
+@@ -18,15 +18,15 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=127.0.0.1:27017
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/schedule/src/main/resources/mysql.properties b/schedule/src/main/resources/mysql.properties
+index 91b03ff..3a9e6b8 100644
+--- a/schedule/src/main/resources/mysql.properties
++++ b/schedule/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQL55Dialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=update
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://10.242.111.24:3306/sotnTest?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=root
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/schedule/src/main/resources/zkclient_conf.properties b/schedule/src/main/resources/zkclient_conf.properties
+index 9a7d1d1..96ca51b 100644
+--- a/schedule/src/main/resources/zkclient_conf.properties
++++ b/schedule/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=schedule
+ NAMESPACE=chengdu
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/sftpserver/src/main/resources/application.yml b/sftpserver/src/main/resources/application.yml
+index c2b46a8..9702e9f 100644
+--- a/sftpserver/src/main/resources/application.yml
++++ b/sftpserver/src/main/resources/application.yml
+@@ -21,7 +21,7 @@ spring:
+       on-profile: default
+ 
+ kafka:
+-  bootstrap-servers: 172.18.86.38:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: sftp-manager
+ 
+@@ -35,6 +35,6 @@ logging:
+   config: ./config/logback-spring.xml
+ 
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: sftp-server
+\ No newline at end of file
+diff --git a/sftpserver/src/main/resources/mongodb.properties b/sftpserver/src/main/resources/mongodb.properties
+index f925623..d399aab 100644
+--- a/sftpserver/src/main/resources/mongodb.properties
++++ b/sftpserver/src/main/resources/mongodb.properties
+@@ -9,16 +9,16 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=127.0.0.1:27017
+-#mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/sftpserver/src/main/resources/zkclient_conf.properties b/sftpserver/src/main/resources/zkclient_conf.properties
+index ae40139..d37d9df 100644
+--- a/sftpserver/src/main/resources/zkclient_conf.properties
++++ b/sftpserver/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=ftpServer
+ NAMESPACE=zxy
+ # when this module is running on VM or physical machine, myIP=hostIp
+diff --git a/status/src/main/resources/application.yml b/status/src/main/resources/application.yml
+index b342270..aab32b8 100644
+--- a/status/src/main/resources/application.yml
++++ b/status/src/main/resources/application.yml
+@@ -18,7 +18,7 @@ spring:
+       on-profile: default
+ 
+ kafka:
+-  bootstrap-servers: 10.242.111.32:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: status-test
+ #logging.level.org.springframework.web: DEBUG
+@@ -32,7 +32,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: status-monitor
+ server:
+diff --git a/status/src/main/resources/cache.properties b/status/src/main/resources/cache.properties
+index a0b7b15..c010bf5 100644
+--- a/status/src/main/resources/cache.properties
++++ b/status/src/main/resources/cache.properties
+@@ -2,8 +2,8 @@ redis.redisson.mode=single
+ # cache properties for the configuration
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/status/src/main/resources/mongodb.properties b/status/src/main/resources/mongodb.properties
+index ab3e564..b75b5c5 100644
+--- a/status/src/main/resources/mongodb.properties
++++ b/status/src/main/resources/mongodb.properties
+@@ -9,16 +9,16 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:37011
+-#mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/status/src/main/resources/mysql.properties b/status/src/main/resources/mysql.properties
+index 1887b6d..75ede65 100644
+--- a/status/src/main/resources/mysql.properties
++++ b/status/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13308/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/status/src/main/resources/zkclient_conf.properties b/status/src/main/resources/zkclient_conf.properties
+index 7fa4d54..d88b10d 100644
+--- a/status/src/main/resources/zkclient_conf.properties
++++ b/status/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=status
+ NAMESPACE=zxy
+diff --git a/subnet-manager/src/main/resources/application.yml b/subnet-manager/src/main/resources/application.yml
+index 223ca53..c2891e5 100644
+--- a/subnet-manager/src/main/resources/application.yml
++++ b/subnet-manager/src/main/resources/application.yml
+@@ -6,7 +6,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   consumer-group: alarm-notifier-local
+ 
+ 
+@@ -17,4 +17,4 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+diff --git a/subnet-manager/src/main/resources/mongodb.properties b/subnet-manager/src/main/resources/mongodb.properties
+index 24bd0bd..d399aab 100644
+--- a/subnet-manager/src/main/resources/mongodb.properties
++++ b/subnet-manager/src/main/resources/mongodb.properties
+@@ -9,16 +9,16 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.200.229:37011
+-#mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/subnet-manager/src/main/resources/zkclient_conf.properties b/subnet-manager/src/main/resources/zkclient_conf.properties
+index fd11200..cbd4fee 100644
+--- a/subnet-manager/src/main/resources/zkclient_conf.properties
++++ b/subnet-manager/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=subnet-manager
+ NAMESPACE=china_Telecom
+diff --git a/system-config-manager/restful/src/main/resources/application.yml b/system-config-manager/restful/src/main/resources/application.yml
+index 1f07eef..0f1141d 100644
+--- a/system-config-manager/restful/src/main/resources/application.yml
++++ b/system-config-manager/restful/src/main/resources/application.yml
+@@ -20,7 +20,7 @@ spring:
+   alarm:
+     topic: odl-alarm-local
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   consumer-group: alarm-notifier-local
+ 
+ #logging.level.org.springframework.web: DEBUG
+@@ -34,7 +34,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+ server:
+   address: ${myIp}
+ logging.level.net.flex.dci.otn.controller.alarm.notifier: INFO
+\ No newline at end of file
+diff --git a/system-config-manager/restful/src/main/resources/cache.properties b/system-config-manager/restful/src/main/resources/cache.properties
+index 8ab7dae..ddeb2b9 100644
+--- a/system-config-manager/restful/src/main/resources/cache.properties
++++ b/system-config-manager/restful/src/main/resources/cache.properties
+@@ -3,8 +3,8 @@ redis.redisson.mode=single
+ # cache properties for the configuration
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/system-config-manager/restful/src/main/resources/mongodb.properties b/system-config-manager/restful/src/main/resources/mongodb.properties
+index 7b440ce..d399aab 100644
+--- a/system-config-manager/restful/src/main/resources/mongodb.properties
++++ b/system-config-manager/restful/src/main/resources/mongodb.properties
+@@ -9,16 +9,16 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=116.128.204.12:27011
+-#mongodb.servers=10.242.111.29:27017,10.242.111.29:27018,10.242.111.29:27019,10.242.111.29:27020
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=dci
+-mongodb.pwd=dciworld@iivi
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/system-config-manager/restful/src/main/resources/mysql.properties b/system-config-manager/restful/src/main/resources/mysql.properties
+index b327ff8..2597800 100644
+--- a/system-config-manager/restful/src/main/resources/mysql.properties
++++ b/system-config-manager/restful/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://116.128.204.12:13308/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/system-config-manager/restful/src/main/resources/zkclient_conf.properties b/system-config-manager/restful/src/main/resources/zkclient_conf.properties
+index 4474657..6f882c8 100644
+--- a/system-config-manager/restful/src/main/resources/zkclient_conf.properties
++++ b/system-config-manager/restful/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=system-config-manager
+ myIp=127.0.0.1
+ port=8092
+diff --git a/taskInfo/src/main/resources/application.yml b/taskInfo/src/main/resources/application.yml
+index d253d58..5de77ff 100644
+--- a/taskInfo/src/main/resources/application.yml
++++ b/taskInfo/src/main/resources/application.yml
+@@ -11,7 +11,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   consumer-group: task-info-test
+ 
+ ---
+@@ -20,6 +20,6 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: ${KAFKA_REPLICA}
+   consumer-group: task-info
+\ No newline at end of file
+diff --git a/taskInfo/src/main/resources/mysql.properties b/taskInfo/src/main/resources/mysql.properties
+index 57bc3d7..a934c72 100644
+--- a/taskInfo/src/main/resources/mysql.properties
++++ b/taskInfo/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=update
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13309/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/taskInfo/src/main/resources/zkclient_conf.properties b/taskInfo/src/main/resources/zkclient_conf.properties
+index b779ba6..1744054 100644
+--- a/taskInfo/src/main/resources/zkclient_conf.properties
++++ b/taskInfo/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ # *  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ # *  and is available at http://www.eclipse.org/legal/epl-v10.html
+ # */
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=taskInfo
+ NAMESPACE=zxy
+diff --git a/tools/batchlock/batchlock-lib/src/test/resources/zkclient_conf.properties b/tools/batchlock/batchlock-lib/src/test/resources/zkclient_conf.properties
+index 19245c8..3afe109 100644
+--- a/tools/batchlock/batchlock-lib/src/test/resources/zkclient_conf.properties
++++ b/tools/batchlock/batchlock-lib/src/test/resources/zkclient_conf.properties
+@@ -6,7 +6,7 @@
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+ 
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ NAME_SPACE=PHYsw_version=v1.2.0.0.0
+ base_version=v1
+ release_count=0
+diff --git a/tools/ne-attribute-upgrade-tool/src/main/resources/mongodb.properties b/tools/ne-attribute-upgrade-tool/src/main/resources/mongodb.properties
+index b806d6f..afe6c79 100644
+--- a/tools/ne-attribute-upgrade-tool/src/main/resources/mongodb.properties
++++ b/tools/ne-attribute-upgrade-tool/src/main/resources/mongodb.properties
+@@ -18,15 +18,15 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-mongodb.servers=127.0.0.1:27017
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ #mongodb.port=27017
+ # database name
+-mongodb.database=sotn
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/tools/ne-attribute-upgrade-tool/src/main/resources/zkclient_conf.properties b/tools/ne-attribute-upgrade-tool/src/main/resources/zkclient_conf.properties
+index 9856fef..c27afbf 100644
+--- a/tools/ne-attribute-upgrade-tool/src/main/resources/zkclient_conf.properties
++++ b/tools/ne-attribute-upgrade-tool/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ # *  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ # *  and is available at http://www.eclipse.org/legal/epl-v10.html
+ # */
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=taskInfo
+ NAMESPACE=zxy
+diff --git a/tools/templates/mongodb.properties b/tools/templates/mongodb.properties
+index cd86731..1b5e4e8 100644
+--- a/tools/templates/mongodb.properties
++++ b/tools/templates/mongodb.properties
+@@ -19,19 +19,19 @@ mongodb.enable=true
+ # enable auto restore data from mongodb
+ mongodb.restore.auto.enable=true
+ #mongodb.ip=10.242.111.24
+-#mongodb.servers=n3:27017
+-mongodb.servers=${MONGO_SERVERS}
++#mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
++mongodb.servers=${MONGO_SERVERS:mongodb-headless.data-platform.svc.cluster.local:27017}
+ 
+ #mongodb.port=27017
+ #mongodb.port=27017
+ # database name
+-#mongodb.database=sotn
+-mongodb.database=${MONGO_DATABASE}
++#mongodb.database=${MONGO_DATABASE:sotn}
++mongodb.database=${MONGO_DATABASE:sotn}
+ # snapshot frequency, default is 100. 100 stands for 100 changes happened in config-tree mongodb save once
+ mongodb.snapshot.freq=100
+-#mongodb.user=
+-mongodb.user=
+-mongodb.pwd=
++#mongodb.user=${MONGO_USER:dci}
++mongodb.user=${MONGO_USER:dci}
++mongodb.pwd=${MONGO_PWD:dciworld@iivi}
+ #defalut is null(supported sha1,sha256,mongd-cr), other mechanism supported SHA-1,SHA-256,MONGODB-CR,X-509,PLAIN,GSSAPI
+ #mongodb.mechanism = sha-1
+ #connection timeout, milliseconds.default is 120000
+diff --git a/tools/templates/mysql.properties b/tools/templates/mysql.properties
+index 4de8f3e..2597800 100644
+--- a/tools/templates/mysql.properties
++++ b/tools/templates/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://${MYSQL_IP}:${MYSQL_PORT}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8
+-spring.datasource.username=${MYSQL_USER}
+-spring.datasource.password=${MYSQL_PASSWORD}
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/tools/templates/zkclient_conf.properties b/tools/templates/zkclient_conf.properties
+index 4d77883..ccf072c 100644
+--- a/tools/templates/zkclient_conf.properties
++++ b/tools/templates/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=${pmcZooKeepers}
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ MODULE=@project.artifactId@
+ myIp=${myIp}
+ port=
+diff --git a/user-manager/src/main/resources/application.yml b/user-manager/src/main/resources/application.yml
+index 6af2a98..3d8d9aa 100644
+--- a/user-manager/src/main/resources/application.yml
++++ b/user-manager/src/main/resources/application.yml
+@@ -21,7 +21,7 @@ spring:
+     activate:
+       on-profile: default
+ kafka:
+-  bootstrap-servers: 127.0.0.1:9092
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: user-test
+ 
+@@ -42,7 +42,7 @@ spring:
+     activate:
+       on-profile: production
+ kafka:
+-  bootstrap-servers: ${KAFKA_BROKER}
++  bootstrap-servers: ${KAFKA_BROKER:kafka.data-platform.svc.cluster.local:9092}
+   replication-factor: 1
+   consumer-group: user-test
+ 
+diff --git a/user-manager/src/main/resources/cache.properties b/user-manager/src/main/resources/cache.properties
+index fc01774..5a41202 100644
+--- a/user-manager/src/main/resources/cache.properties
++++ b/user-manager/src/main/resources/cache.properties
+@@ -4,8 +4,8 @@ redis.redisson.nettyThreads=4
+ # cache properties for the configuration
+ redis.redisson.refreshTimeout=600
+ # redisson single properties
+-redis.redisson.address=redis://127.0.0.1:6379
+-redis.redisson.password=
++redis.redisson.address=redis://${REDIS_HOST:redis.data-platform.svc.cluster.local}:${REDIS_PORT:6379}
++redis.redisson.password=${REDIS_PASSWORD:}
+ #redis sentinel properties
+ redis.redisson.master-name=
+ redis.redisson.sentinel-addresses=
+diff --git a/user-manager/src/main/resources/mysql.properties b/user-manager/src/main/resources/mysql.properties
+index 7e8c51c..2597800 100644
+--- a/user-manager/src/main/resources/mysql.properties
++++ b/user-manager/src/main/resources/mysql.properties
+@@ -9,9 +9,9 @@ spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+ spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=none
+ spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+-spring.datasource.url=jdbc:mysql://116.128.200.229:13308/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8
+-spring.datasource.username=root
+-spring.datasource.password=dciworld@iivi
++spring.datasource.url=jdbc:mysql://${MYSQL_HOST:mysql.data-platform.svc.cluster.local}:${MYSQL_PORT:3306}/sotn?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true&useSSL=false
++spring.datasource.username=${MYSQL_USER:root}
++spring.datasource.password=${MYSQL_PASSWORD:dciworld@iivi}
+ spring.datasource.platform=mysql
+ spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+ spring.datasource.initialSize=1
+diff --git a/user-manager/src/main/resources/zkclient_conf.properties b/user-manager/src/main/resources/zkclient_conf.properties
+index 7e209d7..cfdb586 100644
+--- a/user-manager/src/main/resources/zkclient_conf.properties
++++ b/user-manager/src/main/resources/zkclient_conf.properties
+@@ -5,7 +5,7 @@
+ #  terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ #  and is available at http://www.eclipse.org/legal/epl-v10.html
+ #
+-ZOOKEEPER_SERVERS=127.0.0.1:2181
++ZOOKEEPER_SERVERS=${ZOOKEEPER_SERVERS:zookeeper.data-platform.svc.cluster.local:2181}
+ # controller/adapter/collector/parser/monitor/maintenanceTool
+ MODULE=user-manager
+ NAMESPACE=chengdu
+-- 
+2.34.1
+
