@@ -103,11 +103,23 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 echo "==> 正在将安装脚本同步到 3 台虚拟机内部..."
 for node in k8s-master-01 k8s-master-02 k8s-master-03; do
     echo "--> 传输脚本至 [${node}]..."
-    ${MP_USER_CMD} exec "${node}" -- sudo mkdir -p /root/scripts/k8s-ha-setup
+    ${MP_USER_CMD} exec "${node}" -- sudo mkdir -p /root/scripts/k8s-ha-setup /scripts/k8s-ha-setup /home/ubuntu/scripts/k8s-ha-setup /tmp
     ${MP_USER_CMD} transfer "${SCRIPT_DIR}/install-k8s-prerequisites.sh" "${node}:/tmp/install-k8s-prerequisites.sh"
     ${MP_USER_CMD} transfer "${SCRIPT_DIR}/setup-haproxy-keepalived.sh" "${node}:/tmp/setup-haproxy-keepalived.sh"
     ${MP_USER_CMD} transfer "${SCRIPT_DIR}/init-masters.sh" "${node}:/tmp/init-masters.sh"
+    if [ -f "${SCRIPT_DIR}/kube-flannel.yaml" ]; then
+        ${MP_USER_CMD} transfer "${SCRIPT_DIR}/kube-flannel.yaml" "${node}:/tmp/kube-flannel.yaml"
+    fi
     
+    # 在虚拟机内将脚本同步分发到 /scripts 及 /root/scripts，保证无论使用哪种路径均可直接执行
+    ${MP_USER_CMD} exec "${node}" -- sudo bash -c '
+        cp /tmp/*.sh /root/scripts/k8s-ha-setup/ 2>/dev/null || true
+        cp /tmp/*.sh /scripts/k8s-ha-setup/ 2>/dev/null || true
+        cp /tmp/*.sh /scripts/ 2>/dev/null || true
+        cp /tmp/*.sh /home/ubuntu/scripts/ 2>/dev/null || true
+        chmod +x /tmp/*.sh /scripts/*.sh /scripts/k8s-ha-setup/*.sh /root/scripts/k8s-ha-setup/*.sh 2>/dev/null || true
+    '
+
     echo "--> 在 [${node}] 内部执行系统优化与 containerd / kubeadm 安装..."
     ${MP_USER_CMD} exec "${node}" -- sudo bash /tmp/install-k8s-prerequisites.sh
 done
@@ -117,12 +129,15 @@ echo "=================================================================="
 echo "✅ 所有 3 台虚拟机底座软件 (containerd + kubeadm + kubectl) 安装完毕！"
 echo ""
 echo "👉 下一步：在各虚拟机内配置 HAProxy + Keepalived 高可用："
-echo "   1) 在 master-01 执行:"
-echo "      multipass exec k8s-master-01 -- sudo bash /tmp/setup-haproxy-keepalived.sh ${SUGGESTED_VIP} auto ${IP1} ${IP2} ${IP3}"
-echo "   2) 在 master-02 执行:"
-echo "      multipass exec k8s-master-02 -- sudo bash /tmp/setup-haproxy-keepalived.sh ${SUGGESTED_VIP} auto ${IP1} ${IP2} ${IP3}"
-echo "   3) 在 master-03 执行:"
-echo "      multipass exec k8s-master-03 -- sudo bash /tmp/setup-haproxy-keepalived.sh ${SUGGESTED_VIP} auto ${IP1} ${IP2} ${IP3}"
+echo "   【一键方式（推荐）】在宿主机终端一次性为 3 台 master 启动高可用："
+echo "   for vm in k8s-master-01 k8s-master-02 k8s-master-03; do"
+echo "     multipass exec \${vm} -- sudo bash /tmp/setup-haproxy-keepalived.sh ${SUGGESTED_VIP} auto ${IP1} ${IP2} ${IP3}"
+echo "   done"
+echo ""
+echo "   【或者分步执行】：各虚拟机内已同步好脚本（支持 /tmp/ 或 /scripts/ 路径）："
+echo "   1) master-01: multipass exec k8s-master-01 -- sudo bash /tmp/setup-haproxy-keepalived.sh ${SUGGESTED_VIP} auto ${IP1} ${IP2} ${IP3}"
+echo "   2) master-02: multipass exec k8s-master-02 -- sudo bash /tmp/setup-haproxy-keepalived.sh ${SUGGESTED_VIP} auto ${IP1} ${IP2} ${IP3}"
+echo "   3) master-03: multipass exec k8s-master-03 -- sudo bash /tmp/setup-haproxy-keepalived.sh ${SUGGESTED_VIP} auto ${IP1} ${IP2} ${IP3}"
 echo ""
 echo "👉 第 3 步：初始化集群（在 master-01 上执行）:"
 echo "   multipass exec k8s-master-01 -- sudo bash /tmp/init-masters.sh ${SUGGESTED_VIP}"

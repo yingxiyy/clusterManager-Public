@@ -41,6 +41,11 @@ echo "--> Building ZooKeeper 3.9.3 (Java 21)..."
 docker build -t "${REGISTRY}/zookeeper:3.9.3-java21" -f docker/zookeeper/Dockerfile docker/zookeeper
 docker push "${REGISTRY}/zookeeper:3.9.3-java21"
 
+# 7. Cluster Manager Web Platform (appz)
+echo "--> Building Cluster Manager Platform (appz)..."
+docker build -t "${REGISTRY}/cluster-manager:latest" -f Dockerfile .
+docker push "${REGISTRY}/cluster-manager:latest"
+
 echo "======================================================================"
 echo " All Docker images built and pushed successfully!"
 echo "======================================================================"

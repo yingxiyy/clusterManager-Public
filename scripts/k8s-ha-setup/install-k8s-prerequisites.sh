@@ -29,6 +29,9 @@ sysctl --system
 
 echo "===> [3/5] Installing Container Runtime (containerd)..."
 if command -v apt-get &> /dev/null; then
+  # 自动切换为国内高速 Ubuntu 镜像源，大幅加速软件包下载
+  sed -i 's#http://archive.ubuntu.com/ubuntu#https://mirrors.aliyun.com/ubuntu#g' /etc/apt/sources.list 2>/dev/null || true
+  sed -i 's#http://security.ubuntu.com/ubuntu#https://mirrors.aliyun.com/ubuntu#g' /etc/apt/sources.list 2>/dev/null || true
   apt-get update -y
   apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
   apt-get install -y containerd
@@ -52,8 +55,13 @@ systemctl restart containerd
 echo "===> [4/5] Adding Kubernetes package repository (${K8S_VERSION})..."
 if command -v apt-get &> /dev/null; then
   mkdir -p -m 755 /etc/apt/keyrings
-  curl -fsSL https://pkgs.k8s.io/core:/stable:/${K8S_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg --yes
-  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${K8S_VERSION}/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
+  # 优先使用阿里云国内高速镜像源，海外源作为兜底
+  if curl -fsSL --connect-timeout 5 https://mirrors.aliyun.com/kubernetes-new/core/stable/${K8S_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg --yes 2>/dev/null; then
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://mirrors.aliyun.com/kubernetes-new/core/stable/${K8S_VERSION}/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
+  else
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/${K8S_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg --yes
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${K8S_VERSION}/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list
+  fi
 
   apt-get update -y
   apt-get install -y kubelet kubeadm kubectl

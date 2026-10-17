@@ -12,9 +12,33 @@ echo "======================================================================"
 echo " 🛠️  K8s 集群前置就绪准备 (污点清除 / 动态存储卷 / 国内镜像加速)"
 echo "======================================================================"
 
+# 0. 自动适配与继承 KUBECONFIG（即使加了 sudo 也能自动使用 sysadmin 的凭据）
+if [ -z "${KUBECONFIG:-}" ]; then
+  if [ -n "${SUDO_USER:-}" ] && [ -f "/home/${SUDO_USER}/.kube/config" ]; then
+    export KUBECONFIG="/home/${SUDO_USER}/.kube/config"
+  elif [ -f "${HOME}/.kube/config" ]; then
+    export KUBECONFIG="${HOME}/.kube/config"
+  elif [ -f "/root/.kube/config" ]; then
+    export KUBECONFIG="/root/.kube/config"
+  fi
+fi
+
 # 1. 验证 kubectl 连接
 if ! kubectl cluster-info >/dev/null 2>&1 && ! kubectl get nodes >/dev/null 2>&1; then
-  echo "❌ 无法通过 kubectl 连接集群，请先确认 ~/.kube/config 已正确配置。"
+  echo "❌ 无法通过 kubectl 连接集群！"
+  echo ""
+  echo "👉 请排查以下原因："
+  echo "   1) 是否尚未执行《手册.md》的【步骤 3】将虚拟机凭据同步到物理机？"
+  echo "      请在宿主机终端执行以下命令拉取凭据："
+  echo "      mkdir -p \$HOME/.kube"
+  echo "      multipass exec k8s-master-01 -- sudo cat /etc/kubernetes/admin.conf > \$HOME/.kube/config"
+  echo "      chmod 600 \$HOME/.kube/config"
+  echo ""
+  echo "   2) 如果你刚刚执行了【步骤 0】（创建虚拟机），请务必依次执行："
+  echo "      • 步骤 1：在 3 台虚拟机内启动 HAProxy + Keepalived 高可用"
+  echo "      • 步骤 2：在 k8s-master-01 上初始化集群并 join 其余 master"
+  echo "      • 步骤 3：拉取凭据（如上所示）"
+  echo "      • 步骤 4：然后再执行本脚本部署存储与镜像加速！"
   exit 1
 fi
 
@@ -33,38 +57,18 @@ VMS=("k8s-master-01" "k8s-master-02" "k8s-master-03")
 for vm in "${VMS[@]}"; do
   if multipass info "${vm}" >/dev/null 2>&1; then
     echo "  -> 正在为 ${vm} 配置 containerd 镜像加速源..."
-    multipass exec "${vm}" -- sudo bash -c 'cat <<EOF > /tmp/update-containerd-mirrors.py
-import re
-
-config_path = "/etc/containerd/config.toml"
-try:
-    with open(config_path, "r") as f:
-        content = f.read()
-except Exception:
-    content = ""
-
-# Check if mirrors are already configured
-if "docker.m.daocloud.io" not in content:
-    mirror_config = """
-      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
-          endpoint = ["https://docker.m.daocloud.io", "https://dockerproxy.net", "https://registry-1.docker.io"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
-          endpoint = ["https://k8s.m.daocloud.io", "https://registry.aliyuncs.com/google_containers"]
-        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
-          endpoint = ["https://quay.m.daocloud.io"]
-"""
-    if "[plugins.\"io.containerd.grpc.v1.cri\".registry]" in content:
-        content = content.replace("[plugins.\"io.containerd.grpc.v1.cri\".registry]", "[plugins.\"io.containerd.grpc.v1.cri\".registry]" + mirror_config)
-    else:
-        content += "\n" + mirror_config
-    with open(config_path, "w") as f:
-        f.write(content)
-EOF
-python3 /tmp/update-containerd-mirrors.py
-systemctl restart containerd
-'
-    echo "  ✅ ${vm} containerd 镜像加速配置完成！"
+    multipass exec "${vm}" -- sudo bash -c '
+      swapoff -a
+      # 备份并重置生成干净的标准配置
+      cp -n /etc/containerd/config.toml /etc/containerd/config.toml.bak 2>/dev/null || true
+      containerd config default > /etc/containerd/config.toml
+      sed -i "s/SystemdCgroup = false/SystemdCgroup = true/g" /etc/containerd/config.toml
+      sed -i -E "s#(sandbox_image\s*=\s*)\"[^\"]+\"#\1\"registry.aliyuncs.com/google_containers/pause:3.9\"#g" /etc/containerd/config.toml
+      systemctl daemon-reload
+      systemctl restart containerd
+      systemctl restart kubelet
+    '
+    echo "  ✅ ${vm} containerd 标准配置与 SystemdCgroup 已修复！"
   else
     echo "  ⚠️ 未找到虚拟机 ${vm}，跳过。"
   fi

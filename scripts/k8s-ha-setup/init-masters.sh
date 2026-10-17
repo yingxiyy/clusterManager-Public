@@ -30,8 +30,16 @@ mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
 
-echo "Step 2: Installing CNI (Flannel/Calico)..."
-kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+echo "Step 2: Installing CNI (Flannel)..."
+if [ -f "/tmp/kube-flannel.yaml" ]; then
+  kubectl apply -f /tmp/kube-flannel.yaml
+elif [ -f "/scripts/k8s-ha-setup/kube-flannel.yaml" ]; then
+  kubectl apply -f /scripts/k8s-ha-setup/kube-flannel.yaml
+elif [ -f "/opt/kubernetes/kube-flannel.yaml" ]; then
+  kubectl apply -f /opt/kubernetes/kube-flannel.yaml
+else
+  kubectl apply -f https://mirror.ghproxy.com/https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml 2>/dev/null || kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+fi
 
 echo "Step 3: Untaint Master nodes so worker pods (Kafka, Mongo, Flink) can run on them..."
 kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
